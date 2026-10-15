@@ -1,219 +1,185 @@
+// @dart=2.17
+
 import 'package:flutter/material.dart';
 import 'package:flutter_netflex_ui/models/MyModels.dart';
 import 'package:flutter_netflex_ui/widget/CircularClipper.dart';
 import 'package:flutter_netflex_ui/widget/HorizontalScrollWidget.dart';
 
+class DetailScreen extends StatefulWidget {
+  const DetailScreen({Key? key, required this.movie}) : super(key: key);
 
-class DetailScreen extends StatefulWidget{
   final Movie movie;
 
-  DetailScreen({this.movie});
-
   @override
-  _DetailScreenState createState() => _DetailScreenState();
+  State<DetailScreen> createState() => _DetailScreenState();
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+  bool _isSaved = false;
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final movie = widget.movie;
     return Scaffold(
       backgroundColor: Colors.white,
       body: ListView(
+        padding: EdgeInsets.zero,
         children: <Widget>[
-          Stack(
-            children: <Widget>[
-              Container(
-                transform: Matrix4.translationValues(0.0, -50.0, 0.0),
-                child: Hero(
-                  tag: widget.movie.imageUrl,
-                  child: ClipShadowPath(
-                    clipper: CircularClipper(),
-                    shadow: Shadow(blurRadius: 20.0),
-                    child: Image(
-                      height: 400.0,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      image: AssetImage(widget.movie.imageUrl),
-                    ),
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  IconButton(
-                    padding: EdgeInsets.only(left: 30.0),
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(Icons.arrow_back),
-                    iconSize: 30.0,
-                    color: Colors.black,
-                  ),
-                  Image(
-                    image: AssetImage('assets/images/netflix_logo.png'),
-                    height: 60.0,
-                    width: 150.0,
-                  ),
-                  IconButton(
-                    padding: EdgeInsets.only(right: 30.0),
-                    onPressed: () => print('Add to Favorites'),
-                    icon: Icon(Icons.favorite_border),
-                    iconSize: 30.0,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-              Positioned.fill(
-                bottom: 10.0,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: RawMaterialButton(
-                    padding: EdgeInsets.all(10.0),
-                    elevation: 12.0,
-                    onPressed: () => print('Play Video'),
-                    shape: CircleBorder(),
-                    fillColor: Colors.white,
-                    child: Icon(
-                      Icons.play_arrow,
-                      size: 60.0,
-                      color: Colors.red,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0.0,
-                left: 20.0,
-                child: IconButton(
-                  onPressed: () => print('Add to My List'),
-                  icon: Icon(Icons.add),
-                  iconSize: 40.0,
-                  color: Colors.black,
-                ),
-              ),
-              Positioned(
-                bottom: 0.0,
-                right: 25.0,
-                child: IconButton(
-                  onPressed: () => print('Share'),
-                  icon: Icon(Icons.share),
-                  iconSize: 35.0,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
+          _buildHero(movie),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  widget.movie.title.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  movie.title.toUpperCase(),
+                  style: const TextStyle(
+                      fontSize: 21, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 10.0),
+                const SizedBox(height: 8),
                 Text(
-                  widget.movie.categories,
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 16.0,
-                  ),
+                  movie.categories,
+                  style: const TextStyle(color: Colors.black54, fontSize: 16),
                 ),
-                SizedBox(height: 12.0),
-                Text(
-                  '⭐ ⭐ ⭐ ⭐',
-                  style: TextStyle(fontSize: 25.0),
-                ),
-                SizedBox(height: 15.0),
+                const SizedBox(height: 10),
+                const Icon(Icons.star, color: Color(0xFFFFB300), size: 28),
+                const SizedBox(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          'Year',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        SizedBox(height: 2.0),
-                        Text(
-                          widget.movie.year.toString(),
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          'Country',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        SizedBox(height: 2.0),
-                        Text(
-                          widget.movie.country.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          'Length',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16.0,
-                          ),
-                        ),
-                        SizedBox(height: 2.0),
-                        Text(
-                          '${widget.movie.length} min',
-                          style: TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
+                    _MovieFact(label: 'Year', value: '${movie.year}'),
+                    _MovieFact(
+                        label: 'Country', value: movie.country.toUpperCase()),
+                    _MovieFact(label: 'Length', value: '${movie.length} min'),
                   ],
                 ),
-                SizedBox(height: 25.0),
-                Container(
-                  height: 120.0,
-                  child: SingleChildScrollView(
-                    child: Text(
-                      widget.movie.description,
-                      style: TextStyle(
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ),
+                const SizedBox(height: 24),
+                Text(
+                  movie.description,
+                  style: const TextStyle(color: Colors.black87, height: 1.5),
+                  textAlign: TextAlign.start,
                 ),
               ],
             ),
           ),
           HorizontalScrollWidget(
-            images: widget.movie.screenshots,
+            images: movie.screenshots,
             title: 'Screenshots',
-            imageHeight: 200.0,
-            imageWidth: 250.0,
+            imageHeight: 200,
+            imageWidth: 250,
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHero(Movie movie) {
+    return SizedBox(
+      height: 390,
+      child: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          Transform.translate(
+            offset: const Offset(0, -30),
+            child: Hero(
+              tag: movie.imageUrl,
+              child: ClipShadowPath(
+                clipper: CircularClipper(),
+                shadow: const Shadow(blurRadius: 20, color: Colors.black38),
+                child: Image.asset(movie.imageUrl, fit: BoxFit.cover),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  IconButton(
+                    tooltip: 'Back',
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                  Image.asset(
+                    'assets/images/netflix_logo.png',
+                    height: 28,
+                    semanticLabel: 'Netflix',
+                  ),
+                  IconButton(
+                    tooltip:
+                        _isSaved ? 'Remove from My List' : 'Add to My List',
+                    onPressed: () {
+                      setState(() => _isSaved = !_isSaved);
+                      _showMessage(_isSaved
+                          ? 'Added to My List'
+                          : 'Removed from My List');
+                    },
+                    icon:
+                        Icon(_isSaved ? Icons.favorite : Icons.favorite_border),
+                    color: _isSaved ? Colors.red : Colors.black,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 8,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: FloatingActionButton(
+                heroTag: 'play-${movie.imageUrl}',
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.red,
+                tooltip: 'Play ${movie.title}',
+                onPressed: () =>
+                    _showMessage('Playback is not available in this demo.'),
+                child: const Icon(Icons.play_arrow, size: 38),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 0,
+            right: 12,
+            child: IconButton(
+              tooltip: 'Share',
+              onPressed: () =>
+                  _showMessage('Sharing is not available in this demo.'),
+              icon: const Icon(Icons.share),
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MovieFact extends StatelessWidget {
+  const _MovieFact({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: <Widget>[
+        Text(label,
+            style: const TextStyle(color: Colors.black54, fontSize: 14)),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+      ],
     );
   }
 }

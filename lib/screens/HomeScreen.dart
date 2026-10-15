@@ -1,112 +1,135 @@
+// @dart=2.17
+
 import 'package:flutter/material.dart';
 import 'package:flutter_netflex_ui/models/MyModels.dart';
 import 'package:flutter_netflex_ui/screens/DetailScreen.dart';
 import 'package:flutter_netflex_ui/widget/HorizontalScrollWidget.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  PageController _pageController;
+  late final PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1, viewportFraction: 0.8);
+    _pageController = PageController(viewportFraction: 0.84);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _openMovie(Movie movie) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => DetailScreen(movie: movie)),
+    );
+  }
+
+  Future<void> _openSearch() async {
+    final movie = await showSearch<Movie?>(
+      context: context,
+      delegate: _MovieSearchDelegate(),
+    );
+    if (movie != null && mounted) _openMovie(movie);
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Center(
-            child: Image(
-              image: AssetImage('assets/images/netflix_logo.png'),
-            ),
+      appBar: AppBar(
+        leading: IconButton(
+          tooltip: 'Menu',
+          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Choose a title to start browsing.')),
           ),
-          elevation: 0.0,
-          leading: IconButton(
-            padding: EdgeInsets.only(left: 30.0),
-            onPressed: () => print('Menu'),
-            icon: Icon(Icons.menu),
-            iconSize: 30.0,
-            color: Colors.black,
-          ),
-          actions: <Widget>[
-            IconButton(
-              padding: EdgeInsets.only(right: 30.0),
-              onPressed: () => print('Search'),
-              icon: Icon(Icons.search),
-              iconSize: 30.0,
-              color: Colors.black,
-            ),
-          ],
+          icon: const Icon(Icons.menu),
         ),
-        body: ListView(
-          children: <Widget>[
-            _buildCarousel(),
-            _buildItems(),
-            SizedBox(height: 20,),
-            HorizontalScrollWidget(images: myList,
-              title: 'My List',
-              imageHeight: 250.0,
-              imageWidth: 150.0,),
-            SizedBox(height: 20,),
-            HorizontalScrollWidget(images: specials,
-              title: 'Popular on Netflix',
-              imageHeight: 250.0,
-              imageWidth: 150.0,),
-          ],
-        ));
+        title: Image.asset(
+          'assets/images/netflix_logo.png',
+          height: 30,
+          semanticLabel: 'Netflix',
+        ),
+        actions: <Widget>[
+          IconButton(
+            tooltip: 'Search titles',
+            onPressed: _openSearch,
+            icon: const Icon(Icons.search),
+          ),
+        ],
+      ),
+      body: ListView(
+        children: <Widget>[
+          _buildCarousel(),
+          _buildCategories(),
+          const SizedBox(height: 12),
+          const HorizontalScrollWidget(
+            images: myList,
+            title: 'My List',
+            imageHeight: 250,
+            imageWidth: 150,
+          ),
+          const SizedBox(height: 12),
+          const HorizontalScrollWidget(
+            images: specials,
+            title: 'Popular on Netflix',
+            imageHeight: 250,
+            imageWidth: 150,
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
   }
 
-  Widget _buildItems() {
-    return Container(
-      height: 90.0,
+  Widget _buildCategories() {
+    return SizedBox(
+      height: 90,
       child: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 30.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Container(
-            margin: EdgeInsets.all(10.0),
-            width: 160.0,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.0),
-              image: DecorationImage(
-                image: AssetImage(items[index].bgImage),
-                fit: BoxFit.cover,
-                colorFilter: new ColorFilter.mode(
-                    Colors.red.withOpacity(0.2), BlendMode.dstATop),
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFFD45253),
-                  Color(0xFF9E1F28),
+        itemBuilder: (context, index) {
+          final item = items[index];
+          return Semantics(
+            label: item.title,
+            image: true,
+            child: Container(
+              width: 160,
+              margin: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                image: DecorationImage(
+                  image: AssetImage(item.bgImage),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    Colors.black.withOpacity(0.55),
+                    BlendMode.darken,
+                  ),
+                ),
+                boxShadow: const <BoxShadow>[
+                  BoxShadow(
+                    color: Color(0x339E1F28),
+                    offset: Offset(0, 2),
+                    blurRadius: 6,
+                  ),
                 ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFF9E1F28),
-                  offset: Offset(0.0, 2.0),
-                  blurRadius: 6.0,
-                ),
-              ],
-            ),
-            child: Center(
+              alignment: Alignment.center,
               child: Text(
-                items[index].title.toUpperCase(),
-                style: TextStyle(
+                item.title.toUpperCase(),
+                style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 16.0,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 1.8,
+                  letterSpacing: 1.4,
                 ),
               ),
             ),
@@ -116,94 +139,143 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-  Widget _buildCarousel(){
-    return  Container(
-      height: 240.0,
-      width: double.infinity,
+  Widget _buildCarousel() {
+    return SizedBox(
+      height: 250,
       child: PageView.builder(
         controller: _pageController,
         itemCount: movies.length,
-        itemBuilder: (BuildContext context, int index) {
-          return _movieSelector(index);
+        itemBuilder: (context, index) {
+          final movie = movies[index];
+          return AnimatedBuilder(
+            animation: _pageController,
+            builder: (context, child) {
+              var distance = 0.0;
+              if (_pageController.hasClients &&
+                  _pageController.position.hasContentDimensions) {
+                distance = (_pageController.page! - index).abs();
+              }
+              final scale = (1 - distance * 0.2).clamp(0.8, 1.0).toDouble();
+              return Center(
+                child: Transform.scale(scale: scale, child: child),
+              );
+            },
+            child: _buildMovieCard(movie),
+          );
         },
       ),
     );
   }
 
-
-  _movieSelector(int index) {
-    return AnimatedBuilder(
-      animation: _pageController,
-      builder: (BuildContext context, Widget widget) {
-        double value = 1;
-        if (_pageController.position.haveDimensions) {
-          value = _pageController.page - index;
-          value = (1 - (value.abs() * 0.3) + 0.06).clamp(0.0, 1.0);
-        }
-        return Center(
-          child: SizedBox(
-            height: Curves.easeInOut.transform(value) * 230.0,
-            width: Curves.easeInOut.transform(value) * 400.0,
-            child: widget,
-          ),
-        );
-      },
+  Widget _buildMovieCard(Movie movie) {
+    return Semantics(
+      button: true,
+      label: 'View ${movie.title}',
       child: GestureDetector(
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => DetailScreen(movie: movies[index]),
+        onTap: () => _openMovie(movie),
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: const <BoxShadow>[
+              BoxShadow(
+                color: Colors.black38,
+                offset: Offset(0, 4),
+                blurRadius: 10,
+              ),
+            ],
           ),
-        ),
-        child: Stack(
-          children: <Widget>[
-            Center(
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black54,
-                      offset: Offset(0.0, 4.0),
-                      blurRadius: 10.0,
-                    ),
-                  ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                Hero(
+                  tag: movie.imageUrl,
+                  child: Image.asset(movie.imageUrl, fit: BoxFit.cover),
                 ),
-                child: Center(
-                  child: Hero(
-                    tag: movies[index].imageUrl,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Image(
-                        image: AssetImage(movies[index].imageUrl),
-                        height: 220.0,
-                        fit: BoxFit.cover,
-                      ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[Colors.transparent, Colors.black87],
+                      stops: <double>[0.45, 1],
                     ),
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              left: 30.0,
-              bottom: 40.0,
-              child: Container(
-                width: 250.0,
-                child: Text(
-                  movies[index].title.toUpperCase(),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
+                Positioned(
+                  left: 18,
+                  right: 18,
+                  bottom: 16,
+                  child: Text(
+                    movie.title.toUpperCase(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _MovieSearchDelegate extends SearchDelegate<Movie?> {
+  @override
+  String get searchFieldLabel => 'Search movies';
+
+  List<Movie> get _matches => movies
+      .where((movie) =>
+          movie.title.toLowerCase().contains(query.trim().toLowerCase()))
+      .toList(growable: false);
+
+  @override
+  List<Widget> buildActions(BuildContext context) => <Widget>[
+        if (query.isNotEmpty)
+          IconButton(
+            tooltip: 'Clear search',
+            onPressed: () => query = '',
+            icon: const Icon(Icons.clear),
+          ),
+      ];
+
+  @override
+  Widget buildLeading(BuildContext context) => IconButton(
+        tooltip: 'Close search',
+        onPressed: () => close(context, null),
+        icon: const Icon(Icons.arrow_back),
+      );
+
+  @override
+  Widget buildResults(BuildContext context) => _buildMatches(context);
+
+  @override
+  Widget buildSuggestions(BuildContext context) => _buildMatches(context);
+
+  Widget _buildMatches(BuildContext context) {
+    final matches = _matches;
+    if (matches.isEmpty) {
+      return const Center(child: Text('No matching titles'));
+    }
+    return ListView.builder(
+      itemCount: matches.length,
+      itemBuilder: (context, index) {
+        final movie = matches[index];
+        return ListTile(
+          leading: const Icon(Icons.movie_outlined),
+          title: Text(movie.title),
+          subtitle: Text('${movie.year} · ${movie.categories}'),
+          onTap: () => close(context, movie),
+        );
+      },
     );
   }
 }

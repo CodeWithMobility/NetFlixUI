@@ -1,24 +1,26 @@
-# flutter_netflex_ui
+# Netflix UI
 
-A new Flutter application.
+A Flutter movie discovery UI inspired by [Netflix Mobile App Redesign](https://dribbble.com/shots/5026483-Netflix-Mobile-App-Redesign/). The app includes a featured-title carousel, local title search, a saved-state control, and movie detail pages. Playback and sharing are visual demo actions; they are not connected to a streaming service.
 
-## Getting Started
+## Summary
 
-This project is a starting point for a Flutter application.
+This update modernizes the original UI prototype with null-safe, immutable movie models; a consistent Netflix red theme; and a carousel that correctly disposes its controller. You can search the bundled titles and open a details page, where the My List control toggles saved state for the current session. The layouts include accessibility labels, and the bundled artwork keeps the app usable offline. Search and saved state use local sample data; there is no streaming backend or persistent account storage.
 
-A few resources to get you started if this is your first Flutter project:
+## Requirements
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+- Flutter SDK with Dart 2.17 or later
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# NetflixUI
-Inspire from https://dribbble.com/shots/5026483-Netflix-Mobile-App-Redesign/
+## Run
 
-<img src ="/screenshots/Screenshot_1.png" width="360" height="640">
-<img src ="/screenshots/Screenshot_2.png" width="360" height="640">
+```sh
+flutter pub get
+flutter run
+```
 
+The movie catalog and artwork are bundled in `assets/images/` and the app works offline. To add a title, update the `movies` collection in `lib/models/MyModels.dart` and include its artwork in the asset directory.
 
+## Screenshots
 
+| Home | Details |
+| --- | --- |
+| ![Home screen](screenshots/Screenshot_1.png) | ![Details screen](screenshots/Screenshot_2.png) |
